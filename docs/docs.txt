@@ -1,0 +1,32 @@
+----------------------- completed Phase 1 ----------------
+
+✔ GitHub Repository
+
+✔ React Frontend
+
+✔ Express Backend
+
+✔ PostgreSQL SQL Script
+
+✔ Folder Structure
+
+✔ Local Development Environment
+
+✔ API Health Endpoint
+
+✔ React Connected to Backend
+
+start backend: npm run dev
+http://localhost:5000
+
+showing the health response.
+http://localhost:5000/api/health 
+
+start frontend: npm run dev
+http://localhost:5173/
+
+Git log showing the commits:
+git log --oneline
+
+
+------------------------------------ Phase 2 -------------------------

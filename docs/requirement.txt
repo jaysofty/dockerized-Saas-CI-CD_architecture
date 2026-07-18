@@ -1,0 +1,65 @@
+Install Node.js LTS
+
+Verify:
+run:
+node -v
+npm -v
+
+backend packages:
+npm install express cors helmet morgan dotenv
+npm install @prisma/client@6.16.2
+
+npm install -D prisma@6.16.2
+npx prisma --version
+npm install zod
+
+-------------
+express	API framework
+cors	Cross-origin requests
+helmet	Security headers
+morgan	Logging
+dotenv	Environment variables
+@prisma/client	Database client
+zod	Request validation
+----------------
+Install Development Dependencies
+
+npm install -D \
+typescript \
+ts-node \
+tsx \
+nodemon \
+prisma \
+@types/node \
+@types/express \
+@types/cors \
+@types/morgan
+-----------------------
+
+Initialize TypeScript
+npx tsc --init
+
+
+Initialize Prisma
+npx prisma init
+
+npx prisma generate
+
+Go into the deployment folder
+cd deployment
+
+
+Install Docker Desktop
+Docker Compose
+
+Verify:
+run:
+docker --version
+docker compose version
+
+Start PostgreSQL
+docker compose up -d
+
+npx prisma migrate dev --name init
+
+
