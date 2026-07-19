@@ -1,0 +1,42 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - git
+  - curl
+  - unzip
+  - ca-certificates
+  - apt-transport-https
+  - software-properties-common
+
+runcmd:
+
+  # Install Docker
+  - curl -fsSL https://get.docker.com | sh
+
+  - systemctl enable docker
+
+  - systemctl start docker
+
+  # Install Docker Compose
+  - curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+
+  - chmod +x /usr/local/bin/docker-compose
+
+  # Allow azureuser to run docker
+  - usermod -aG docker azureuser
+
+  # Application directory
+  - mkdir -p /opt/formflow
+
+  - chown -R azureuser:azureuser /opt/formflow
+
+  # Clone repository
+  - sudo -u azureuser git clone https://github.com/jaysofty/dockerized-Saas-CI-CD_architecture /opt/formflow
+
+  # Start application
+  - cd /opt/formflow/deployment
+
+  - docker compose up -d

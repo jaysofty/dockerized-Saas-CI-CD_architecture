@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 
 import * as formService from "../services/form.service";
-
+import { successResponse } from "../utils/apiResponse";
 import { createFormSchema } from "../types/form.schema";
 
 export async function submitForm(
@@ -20,7 +20,12 @@ export async function submitForm(
     validation.data
   );
 
-  return res.status(201).json(form);
+  return res.status(201).json(
+  successResponse(
+    "Form submitted successfully.",
+    form
+  )
+);
 }
 
 export async function getAllForms(
@@ -29,5 +34,11 @@ export async function getAllForms(
 ) {
   const forms = await formService.getForms();
 
-  return res.json(forms);
+  return res.status(200).json(
+  successResponse(
+    "Forms retrieved successfully.",
+    forms,
+    forms.length
+  )
+);
 }

@@ -1,32 +1,225 @@
+Architecture
+
+                     Next.js Frontend
+                           │
+                 API Service Layer (fetch)
+                           │
+                  Express REST API (Docker)
+                           │
+                  Prisma ORM (Docker)
+                           │
+                     PostgreSQL (Docker)
+
+
+These are the core technologies used to build and deploy FormFlow. 
+The application is containerized with Docker, 
+uses PostgreSQL for persistence, 
+Terraform for infrastructure provisioning, 
+and GitHub Actions for continuous integration and deployment."
+
+
+final production Architecture
+
+                 Internet
+                     │
+             Public IP (80/443)
+                     │
+                 Ubuntu VM
+                     │
+          Docker Compose Stack
+        ┌──────────┼──────────┐
+        │          │          │
+     Nginx     Frontend    Backend
+                               │
+                          PostgreSQL
+                     (Docker Container)
+                     │
+             Azure Bastion (Management)
+                     │
+               Azure Portal SSH
+
 ----------------------- completed Phase 1 ----------------
-
-✔ GitHub Repository
-
-✔ React Frontend
-
-✔ Express Backend
-
-✔ PostgreSQL SQL Script
-
-✔ Folder Structure
-
-✔ Local Development Environment
-
-✔ API Health Endpoint
-
-✔ React Connected to Backend
-
-start backend: npm run dev
-http://localhost:5000
-
-showing the health response.
-http://localhost:5000/api/health 
-
-start frontend: npm run dev
-http://localhost:5173/
+Current Progress
+✅ Express + TypeScript
+✅ PostgreSQL
+✅ Prisma
+✅ Dockerized backend
+✅ Docker Compose orchestration
+✅ Swagger/OpenAPI
+✅ React Query
+✅ Next.js frontend communicating with the backend
+✅ Live dashboard statistics
+✅ Health endpoint
+✅ Professional landing page sections
+✅ Nginx Reverse Proxy
 
 Git log showing the commits:
 git log --oneline
 
+tag a release.
+git add .
+git commit -m "feat(api): complete TypeScript backend with Prisma"
+git tag v0.1.0
+git push origin main --tags
 
------------------------------------- Phase 2 -------------------------
+
+Backend Development
+Project initialization
+
+Commands
+npm init
+npm install
+
+installed packagesExpress setup
+Controllers
+Routes
+Middleware
+Validation
+Error handling
+Swagger
+Health endpoint
+
+
+Database
+PostgreSQL
+
+Installing Prisma
+Commands
+npx prisma init
+npx prisma migrate dev
+npx prisma studio
+npx prisma generate
+
+
+
+Docker
+Dockerfile
+Docker Compose
+Images
+Containers
+Volumes
+Networks
+
+build frontend docker image:
+docker build -t formflow-frontend:dev .
+
+build backend image:
+docker build -t formflow-backend:dev .
+
+nginx build:
+docker build -t formflow-nginx:dev .
+
+docker tag formflow-backend:dev kunzydev/formflow-backend:1.0.0
+
+docker tag formflow-frontend:dev kunzydev/formflow-frontend:1.0.1
+
+docker tag formflow-nginx:dev kunzydev/formflow-nginx:1.0.0
+
+Useful Docker Compose Commands:
+cd to deployment directory
+
+start postgres:
+docker compose up -d postgres
+
+apply prisma migration:
+docker compose run --rm backend npx prisma migrate deploy
+
+Local development
+docker compose up --build or docker compose up -d
+
+check prisma migration
+docker exec -it formflow-backend npx prisma migrate status
+
+Uses:
+
+docker-compose.yml
+Azure production
+docker compose \
+  --env-file .env \
+  -f docker-compose.prod.yml \
+  up -d
+
+Uses:
+
+docker-compose.prod.yml
+
+start all existing containers:
+docker compose up -d
+
+Open:
+http://localhost
+
+Stop all services:
+docker compose down
+
+View logs from all services:
+docker compose logs -f
+
+View logs for the frontend:
+docker logs formflow-frontend --tail=100
+
+View logs for the backend:
+docker logs formflow-backend --tail=100
+
+check frontend container:
+docker exec formflow-frontend printenv | grep PORT
+
+Stop and remove volumes (this deletes your PostgreSQL data)
+docker compose down -v
+Rebuild after code changes
+
+If you change the Dockerfile, package dependencies, or build output:
+docker compose up --build -d
+
+confirm docker network
+docker network ls
+
+
+
+------------------------------------ Next Phase Terraform automation for  azure resources -------------------------
+
+The Full Module Plan
+
+✅ Resource Group
+🔜 Virtual Network
+🔜 Subnet
+🔜 Network Security Group
+🔜 Public IP
+🔜 Network Interface
+🔜 Linux Virtual Machine
+🔜 Managed Identity (optional but recommended)
+🔜 Monitoring
+🔜 Outputs
+
+✅ Current Infrastructure
+✔ Resource Group
+✔ Virtual Network
+✔ Application Subnet
+✔ Azure Bastion Subnet
+✔ Network Security Group
+✔ NSG Association
+✔ SSH Rule
+✔ HTTP Rule
+✔ HTTPS Rule
+✔ Public IP
+✔ Network Interface
+✔ Bastion Public IP
+✔ Azure Bastion Host
+
+
+Test the Module
+From the terraform directory:
+cd terraform/environments/dev
+RUN:
+terraform init
+
+terraform validate
+
+terraform fmt
+
+terraform plan
+
+terraform apply
+
+terraform state list
+

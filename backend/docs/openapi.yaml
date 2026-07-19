@@ -1,0 +1,177 @@
+openapi: 3.0.3
+
+info:
+  title: FormFlow API
+  description: REST API for the FormFlow SaaS application
+  version: 1.0.0
+
+servers:
+  - url: /api/v1
+
+tags:
+  - name: Health
+    description: API Health Endpoints
+
+  - name: Forms
+    description: Form Submission Operations
+
+paths:
+
+  /health:
+    get:
+      tags:
+        - Health
+
+      summary: Check API Health
+
+      responses:
+        "200":
+          description: API is healthy
+
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /forms:
+    get:
+      tags:
+        - Forms
+
+      summary: Retrieve all submitted forms
+
+      responses:
+        "200":
+          description: List of form submissions
+
+          content:
+            application/json:
+              schema:
+                type: array
+
+                items:
+                  $ref: "#/components/schemas/Form"
+
+    post:
+      tags:
+        - Forms
+
+      summary: Submit a new contact form
+
+      requestBody:
+        required: true
+
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewForm"
+
+      responses:
+
+        "201":
+          description: Form submitted successfully
+
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Form"
+
+        "400":
+          description: Validation Error
+
+components:
+
+  schemas:
+
+    HealthResponse:
+
+      type: object
+
+      properties:
+
+        success:
+          type: boolean
+
+          example: true
+
+        status:
+          type: string
+
+          example: Healthy
+
+        application:
+          type: string
+
+          example: FormFlow
+
+        version:
+          type: string
+
+          example: 1.0.0
+
+        uptime:
+          type: number
+
+          example: 252.5
+
+        timestamp:
+          type: string
+
+          format: date-time
+
+    Form:
+
+      type: object
+
+      properties:
+
+        id:
+          type: integer
+
+          example: 1
+
+        name:
+          type: string
+
+          example: Adekunle
+
+        email:
+          type: string
+
+          example: adekunle@example.com
+
+        message:
+          type: string
+
+          example: Hello FormFlow!
+
+        createdAt:
+          type: string
+
+          format: date-time
+
+    NewForm:
+
+      type: object
+
+      required:
+        - name
+        - email
+        - message
+
+      properties:
+
+        name:
+          type: string
+
+          example: Adekunle
+
+        email:
+          type: string
+
+          example: adekunle@example.com
+
+        message:
+          type: string
+
+          example: I would like a demo.

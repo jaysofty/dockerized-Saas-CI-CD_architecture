@@ -1,0 +1,93 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: formflow-postgres
+
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root12_known
+      POSTGRES_DB: formflow
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+
+    networks:
+      - formflow
+
+  backend:
+
+    image: kunzydev/formflow-backend:1.0.0
+
+    container_name: formflow-backend
+
+    restart: unless-stopped
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+
+      PORT: 5000
+
+      DATABASE_URL: postgresql://postgres:root12_known@postgres:5432/formflow
+
+      NODE_ENV: production
+
+    networks:
+      - formflow
+
+  frontend:
+
+    image: kunzydev/formflow-frontend:1.0.0
+
+    container_name: formflow-frontend
+
+    restart: unless-stopped
+
+    depends_on:
+      - backend
+
+    environment:
+
+      NEXT_PUBLIC_API_URL: http://backend:5000/api/v1
+
+    networks:
+      - formflow
+
+  nginx:
+
+    image: kunzydev/formflow-nginx:1.0.0
+
+    container_name: formflow-nginx
+
+    restart: unless-stopped
+
+    depends_on:
+      - frontend
+      - backend
+
+    ports:
+
+      - "80:80"
+
+    networks:
+      - formflow
+
+volumes:
+
+  postgres_data:
+
+networks:
+
+  formflow:

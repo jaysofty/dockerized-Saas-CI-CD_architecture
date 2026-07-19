@@ -6,26 +6,48 @@ import morgan from "morgan";
 import formRoutes from "./routes/form.routes";
 import { notFound } from "./middleware/notFound";
 import { errorHandler } from "./middleware/errorHandler";
+import { swaggerUi, swaggerDocument } from "./config/swagger";
+import { successResponse } from "./utils/apiResponse";
 
 const app = express();
 
 app.use(cors());
-
 app.use(helmet());
-
 app.use(morgan("dev"));
 app.use(express.json());
 
-app.get("/api/health", (_, res) => {
-  res.json({
-    status: "Healthy",
-    application: "FormFlow",
-    version: "1.0.0",
-    timestamp: new Date(),
-  });
+// Health
+app.get("/api/v1/health", (_, res) => {
+  res.status(200).json(
+    successResponse(
+      "API is healthy.",
+      {
+        status: "Healthy",
+        application: "FormFlow",
+        version: "1.0.0",
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
+      }
+    )
+  );
 });
 
-app.use("/api/forms", formRoutes);
+// <-- ADD THIS
+app.get("/api/v1/openapi.json", (_, res) => {
+  res.json(swaggerDocument);
+});
+
+// Swagger
+app.use(
+  "/api/v1/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument)
+);
+
+// Routes
+app.use("/api/v1/forms", formRoutes);
+
+// MUST BE LAST
 app.use(notFound);
 app.use(errorHandler);
 

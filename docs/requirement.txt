@@ -62,4 +62,41 @@ docker compose up -d
 
 npx prisma migrate dev --name init
 
+----------------
+npm install swagger-ui-express swagger-jsdoc
+npm install -D @types/swagger-ui-express @types/swagger-jsdoc
+-----------------------------------
 
+Frontend requirements
+npm install \
+axios \
+react-hook-form \
+@hookform/resolvers \
+zod \
+framer-motion \
+lucide-react \
+react-icons \
+next-themes \
+sonner \
+class-variance-authority \
+clsx \
+tailwind-merge
+
+npx shadcn@latest init
+
+components used
+npx shadcn@latest add \
+button \
+card \
+input \
+textarea \
+label \
+badge \
+separator \
+sheet \
+avatar \
+dropdown-menu \
+toast \
+sonner
+
+npm install embla-carousel-react
