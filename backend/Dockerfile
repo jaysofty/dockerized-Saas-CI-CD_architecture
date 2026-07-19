@@ -68,6 +68,14 @@ LABEL org.opencontainers.image.version="1.0.0"
 # Set ownership
 RUN chown -R appuser:appgroup /app
 
+# Copy entrypoint
+COPY docker-entrypoint.sh .
+
+# Make executable
+RUN chmod +x docker-entrypoint.sh && \
+    chown appuser:appgroup docker-entrypoint.sh
+
+# Switch to non-root user
 USER appuser
 
 EXPOSE 5000
@@ -75,4 +83,4 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
 CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/v1/health || exit 1
 
-CMD ["node", "dist/server.js"]
+CMD ["./docker-entrypoint.sh"]

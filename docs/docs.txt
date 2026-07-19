@@ -65,11 +65,100 @@ Push Images
 Step 5
 Verify Images
 
+Current Progress
+
+✅ Stable main branch
+✅ dev branch for experimentation
+✅ Local compose working
+✅ Production compose using Docker Hub images
+✅ Versioned images (1.0.0)
+✅ Docker Hub repositories created
+✅ Images successfully built and pushed
+
+
 ────────────────────────────
 
 Phase 3
+
+CI Workflow Built
+
+Instead of manually typing Docker commands, 
+GitHub Actions will do this automatically whenever a version tag is created.
+
+
+Developer
+
+git tag v1.0.1
+
+git push origin v1.0.1
+
+        │
+
+        ▼
+
 GitHub Actions
 
+        │
+
+Checkout Repository
+
+        │
+
+Login Docker Hub
+
+        │
+
+Build Backend
+
+        │
+
+Build Frontend
+
+        │
+
+Build Nginx
+
+        │
+
+Push
+
+backend:1.0.1
+
+frontend:1.0.1
+
+nginx:1.0.1
+
+        │
+
+Done
+
+
+The CD Workflow
+
+Once you have a VM (Azure, AWS, Oracle Cloud, etc.), a second workflow will:
+
+SSH into VM
+
+↓
+
+git pull
+
+↓
+
+docker compose pull
+
+↓
+
+docker compose up -d
+
+↓
+
+Health Check
+
+↓
+
+Deployment Complete
+The only change needed later will be adding the VM's SSH credentials as GitHub Secrets.
 ────────────────────────────
 
 Phase 4
@@ -89,6 +178,16 @@ Current Progress
 ✅ Health endpoint
 ✅ Professional landing page sections
 ✅ Nginx Reverse Proxy
+
+
+-----------------------------completed phase 2---------------------------
+
+✅ Versioned Docker images
+✅ Docker Hub
+✅ Production Compose
+✅ Production deployment
+✅ Database migration
+
 ---------------------------------------------
 Git log showing the commits:
 git log --oneline
@@ -175,6 +274,13 @@ docker build -t formflow-frontend:dev .
 build backend image:
 docker build -t formflow-backend:dev .
 
+or 
+
+docker build \
+  -t formflow-backend:dev \
+  -f backend/Dockerfile \
+  ./backend
+
 nginx build:
 docker build -t formflow-nginx:dev .
 
@@ -209,29 +315,49 @@ create production release build for docker hub
 
 Backend
 docker build \
--t kunzydev/formflow-backend:1.0.0 \
+-t kunzydev/formflow-backend:1.0.2 \
 -f ../backend/Dockerfile \
 ../backend
 
 Frontend
 docker build \
--t kunzydev/formflow-frontend:1.0.0 \
--f ../frontend/Dockerfile \
-../frontend
+  -t kunzydev/formflow-frontend:1.0.2 \
+  -f frontend/Dockerfile \
+  ./frontend
+
 
 Nginx
 docker build \
--t kunzydev/formflow-nginx:1.0.0 \
-./nginx
+  -t kunzydev/formflow-nginx:1.0.2 \
+  -f deployment/nginx/Dockerfile \
+  ./deployment/nginx
+
+
 
 
 push to docker hub:
 
-docker push kunzydev/formflow-backend:1.0.0
+docker push kunzydev/formflow-backend:1.0.2
 
-docker push kunzydev/formflow-frontend:1.0.0
+docker push kunzydev/formflow-frontend:1.0.2
 
-docker push kunzydev/formflow-nginx:1.0.0
+docker push kunzydev/formflow-nginx:1.0.2
+
+
+test production compose.yml:
+
+pull before push
+
+docker compose \
+  --env-file .env.production \
+  -f docker-compose.prod.yml \
+  pull
+
+
+docker compose \
+--env-file .env.production \
+-f docker-compose.prod.yml \
+up -d
 
 --------------------------------------
 
@@ -275,7 +401,25 @@ docker compose up --build -d
 confirm docker network
 docker network ls
 
+debug prisma table
+docker exec -it formflow-postgres psql -U postgres -d formflow
 
+then:
+\dt
+
+check prisma migrate status
+docker exec -it formflow-backend npx prisma migrate status
+
+check prisma schema inside container:
+docker exec formflow-backend cat prisma/schema.prisma
+
+deploy migration:
+docker exec -it formflow-backend npx prisma migrate deploy
+
+verify tables:
+docker exec -it formflow-postgres psql -U postgres -d formflow
+
+\dt
 
 ------------------------------------ Next Phase Terraform automation for  azure resources -------------------------
 
