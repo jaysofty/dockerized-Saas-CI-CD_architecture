@@ -37,6 +37,43 @@ final production Architecture
              Azure Bastion (Management)
                      │
                Azure Portal SSH
+--------------------------------------------------------------------
+
+✅ Phase 1
+Application Development
+Docker
+Docker Compose
+Terraform
+
+────────────────────────────
+
+▶ Phase 2
+Docker Hub Release Management
+
+Step 1
+Version Strategy
+
+Step 2
+Build Images
+
+Step 3
+Tag Images
+
+Step 4
+Push Images
+
+Step 5
+Verify Images
+
+────────────────────────────
+
+Phase 3
+GitHub Actions
+
+────────────────────────────
+
+Phase 4
+Azure VM Deployment
 
 ----------------------- completed Phase 1 ----------------
 Current Progress
@@ -52,7 +89,7 @@ Current Progress
 ✅ Health endpoint
 ✅ Professional landing page sections
 ✅ Nginx Reverse Proxy
-
+---------------------------------------------
 Git log showing the commits:
 git log --oneline
 
@@ -131,6 +168,7 @@ Containers
 Volumes
 Networks
 
+Local build
 build frontend docker image:
 docker build -t formflow-frontend:dev .
 
@@ -158,20 +196,52 @@ docker compose run --rm backend npx prisma migrate deploy
 Local development
 docker compose up --build or docker compose up -d
 
+verify the validity of docker compose file:
+docker compose --env-file .env.production -f docker-compose.prod.yml config
+
 check prisma migration
 docker exec -it formflow-backend npx prisma migrate status
 
+
+
+docker-compose.prod.yml
+create production release build for docker hub
+
+Backend
+docker build \
+-t kunzydev/formflow-backend:1.0.0 \
+-f ../backend/Dockerfile \
+../backend
+
+Frontend
+docker build \
+-t kunzydev/formflow-frontend:1.0.0 \
+-f ../frontend/Dockerfile \
+../frontend
+
+Nginx
+docker build \
+-t kunzydev/formflow-nginx:1.0.0 \
+./nginx
+
+
+push to docker hub:
+
+docker push kunzydev/formflow-backend:1.0.0
+
+docker push kunzydev/formflow-frontend:1.0.0
+
+docker push kunzydev/formflow-nginx:1.0.0
+
+--------------------------------------
+
+The workflow:
+docker compose -f docker-compose.prod.yml --env-file .env.production build
+
+followed by:
+docker compose -f docker-compose.prod.yml --env-file .env.production push
+
 Uses:
-
-docker-compose.yml
-Azure production
-docker compose \
-  --env-file .env \
-  -f docker-compose.prod.yml \
-  up -d
-
-Uses:
-
 docker-compose.prod.yml
 
 start all existing containers:

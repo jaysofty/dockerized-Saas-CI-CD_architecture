@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
 
@@ -8,10 +7,9 @@ services:
 
     restart: unless-stopped
 
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: root12_known
-      POSTGRES_DB: formflow
+    env_file:
+      - .env.production
+      - .env.production.database
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -26,7 +24,7 @@ services:
 
   backend:
 
-    image: kunzydev/formflow-backend:1.0.0
+    image: kunzydev/formflow-backend:${IMAGE_TAG}
 
     container_name: formflow-backend
 
@@ -36,20 +34,16 @@ services:
       postgres:
         condition: service_healthy
 
-    environment:
-
-      PORT: 5000
-
-      DATABASE_URL: postgresql://postgres:root12_known@postgres:5432/formflow
-
-      NODE_ENV: production
+    env_file:
+      - .env.production
+      - .env.production.backend
 
     networks:
       - formflow
 
   frontend:
 
-    image: kunzydev/formflow-frontend:1.0.0
+    image: kunzydev/formflow-frontend:${IMAGE_TAG}
 
     container_name: formflow-frontend
 
@@ -58,16 +52,16 @@ services:
     depends_on:
       - backend
 
-    environment:
-
-      NEXT_PUBLIC_API_URL: http://backend:5000/api/v1
+    env_file:
+      - .env.production
+      - .env.production.frontend
 
     networks:
       - formflow
 
   nginx:
 
-    image: kunzydev/formflow-nginx:1.0.0
+    image: kunzydev/formflow-nginx:${IMAGE_TAG}
 
     container_name: formflow-nginx
 
