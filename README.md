@@ -21,15 +21,40 @@ It enables teams to:
 ## 🧱 Architecture
 
 ```
-Internet
-   │
-   ▼
-Nginx (Port 80)
-   │
-   ├───────────────┬───────────────┐
-   ▼               ▼               ▼
-Frontend       Backend        PostgreSQL
-(React + Nginx) (Node API)     (Database)
+                           Internet
+                               │
+                         Port 80 / 443
+                               │
+                    Nginx Reverse Proxy
+                               │
+          ┌────────────────────┼───────────────────┐
+          │                    │
+          ▼                    ▼
+     React Frontend      Express REST API
+                               │
+                          Prisma ORM
+                               │
+                          PostgreSQL
+                        Docker Volume
+
+────────────────────────────────────────────────
+
+Infrastructure (Terraform)
+
+Azure Resource Group
+        │
+Virtual Network
+        │
+Application Subnet
+        │
+Network Security Group
+        │
+Public IP
+        │
+Azure Bastion
+        │
+Ubuntu VM (Deployment Target)
+
 ```
 
 ### 🔹 Frontend
@@ -56,13 +81,15 @@ Frontend       Backend        PostgreSQL
 | ------------- | -------------------- |
 | Frontend      | React (Vite) + Nginx |
 | Backend       | Node.js + Express    |
+| ORM           | Prisma               |
 | Database      | PostgreSQL           |
 | Containers    | Docker               |
 | Orchestration | Docker Compose       |
+| Reverse Proxy | Nginx - App-Entry    |
 | CI/CD         | GitHub Actions       |
 | Registry      | Docker Hub           |
-| Production    | Ubuntu Linux VM      |
-| Reverse Proxy | Nginx (Port 80 only) |
+| Cloud Platform| Microsoft Azure      |
+
 
 ---
 
@@ -83,6 +110,34 @@ formflow-capstone/
 
 ---
 
+
+## 🚀 Project Status
+
+The project has successfully completed the core implementation phase and demonstrates a modern DevOps workflow.
+
+### Completed
+
+- ✅ React frontend
+- ✅ Express + TypeScript REST API
+- ✅ PostgreSQL database
+- ✅ Prisma ORM integration
+- ✅ Swagger/OpenAPI documentation
+- ✅ Dockerized frontend, backend and database
+- ✅ Multi-stage Docker builds
+- ✅ Docker Compose (Development)
+- ✅ Docker Compose (Production)
+- ✅ Docker Hub image registry
+- ✅ GitHub Actions CI pipeline
+- ✅ Semantic versioning
+- ✅ Automatic Prisma migrations
+- ✅ Health check endpoint
+- ✅ Terraform infrastructure modules
+
+### In Progress
+
+- ⏳ Automated deployment to Azure VM (pending Azure VM provisioning)
+
+
 ## 🐳 Docker Strategy
 
 ### Frontend
@@ -101,6 +156,23 @@ formflow-capstone/
 * Persistent volume storage
 
 ---
+
+
+## 📦 Release Management
+
+Production images are versioned using Semantic Versioning (SemVer).
+
+Example:
+
+```
+kunzydev/formflow-backend:1.0.2
+kunzydev/formflow-frontend:1.0.2
+kunzydev/formflow-nginx:1.0.2
+```
+
+Every release is immutable and published to Docker Hub.
+
+Production deployments reference a single `IMAGE_TAG` variable stored inside `.env.production`, making deployments deterministic and simplifying rollback.
 
 ## 🔢 Versioning Strategy
 
@@ -129,23 +201,81 @@ commit: 2fb83ea
 
 ## 🔁 Rollback Strategy
 
-If a deployment fails:
+If a release introduces issues:
+
+1. Update `IMAGE_TAG` inside `.env.production`
+2. Pull the previous Docker images
 
 ```bash
-docker compose down
-# update version in docker-compose.yml
-docker compose pull
-docker compose up -d
+
+docker compose \
+  --env-file .env.production \
+  -f docker-compose.prod.yml \
+  pull
+
 ```
 
-Verify:
+3. Restart the application
 
 ```bash
-docker ps
-curl http://<server-ip>/api/health
+
+docker compose \
+  --env-file .env.production \
+  -f docker-compose.prod.yml \
+  up -d
+
 ```
 
+4. Verify the running version
+
+```bash
+
+docker inspect formflow-backend --format='{{.Config.Image}}'
+```
+
+Rollback requires no image rebuilding because all released versions remain available in Docker Hub.
+
+## 🚀 Production Deployment
+
+Production uses immutable Docker images stored in Docker Hub.
+
+Deploy the latest release:
+
+```bash
+docker compose \
+  --env-file .env.production \
+  -f docker-compose.prod.yml \
+  pull
+
+docker compose \
+  --env-file .env.production \
+  -f docker-compose.prod.yml \
+  up -d
+```
+
+Verify the deployed version:
+
+```bash
+docker inspect formflow-backend --format='{{.Config.Image}}'
+```
 ---
+
+## ☁️ Infrastructure
+
+Infrastructure is provisioned using Terraform.
+
+Current modules include:
+
+- Azure Resource Group
+- Virtual Network
+- Application Subnet
+- Azure Bastion Subnet
+- Network Security Group
+- Public IP
+- Network Interface
+- Azure Bastion
+
+The deployment target is an Ubuntu Linux VM. Automated deployment will be enabled once Azure VM provisioning is completed.
 
 ## 🔐 Secrets Management
 
@@ -165,25 +295,56 @@ curl http://<server-ip>/api/health
 ### Workflow
 
 ```
-Push Code / Tag
-      ↓
+Developer
+
+      │
+
+Push to dev
+
+      │
+
 GitHub Actions
-      ↓
-Run Tests
-      ↓
-Build Docker Images
-      ↓
-Tag Images
-      ↓
-Push to Docker Hub
-      ↓
-SSH into VM
-      ↓
+
+      │
+
+Checkout Repository
+
+      │
+
+Build Backend
+
+      │
+
+Build Frontend
+
+      │
+
+Build Nginx
+
+      │
+
+Push Versioned Images
+
+      │
+
+Docker Hub
+
+      │
+
+(Deployment Stage)
+
+      │
+
+SSH Azure VM
+
+      │
+
 docker compose pull
-      ↓
+
+      │
+
 docker compose up -d
-      ↓
-Health Check ✅
+
 ```
 
 ---
@@ -254,15 +415,20 @@ Versioned deployments and container isolation reduced downtime and simplified re
 
 ---
 
-## 🎯 Key Features
+## ✨ Features
 
-✅ 3-tier architecture
-✅ Fully Dockerized system
-✅ Automated CI/CD pipeline
-✅ Versioned deployments (no `latest`)
-✅ Instant rollback capability
-✅ Production-ready configuration
-✅ Secure secrets management
+- Dockerized 3-tier SaaS architecture
+- React frontend with Express REST API
+- PostgreSQL with Prisma ORM
+- Multi-stage Docker builds
+- Docker Compose (Development & Production)
+- Swagger/OpenAPI documentation
+- Automatic Prisma database migrations
+- GitHub Actions CI pipeline
+- Docker Hub image registry
+- Semantic versioning and rollback support
+- Terraform Infrastructure as Code
+- Azure-ready deployment architecture
 
 ---
 
@@ -278,27 +444,70 @@ Versioned deployments and container isolation reduced downtime and simplified re
 ## 🚀 Getting Started (Local)
 
 ```bash
-git clone https://github.com/yourname/formflow-capstone.git
-cd formflow-capstone/deployment
 
-cp .env.example .env
+git clone https://github.com/<your-username>/formflow-capstone.git
 
-docker compose up -d
+cd deployment
+
+docker compose up --build -d
+
 ```
 
 ---
 
 ## 📦 Docker Images
 
-* `yourname/formflow-frontend`
-* `yourname/formflow-backend`
+Production images are published to Docker Hub.
+
+- `kunzydev/formflow-backend`
+- `kunzydev/formflow-frontend`
+- `kunzydev/formflow-nginx`
 
 ---
+
+## 📸 Screenshots
+
+### Landing Page
+
+![Landing Page](screenshots/landing-page.png)
+
+---
+
+### Swagger API Documentation
+
+![Swagger](screenshots/swagger-ui.png)
+
+---
+
+### Docker Desktop
+
+![Docker Desktop](screenshots/docker-desktop.png)
+
+---
+
+### Docker Hub Images
+
+![Docker Hub](screenshots/dockerhub.png)
+
+---
+
+### GitHub Actions Pipeline
+
+![GitHub Actions](screenshots/github-actions.png)
+
+---
+
+### Running Containers
+
+![Docker PS](screenshots/docker-ps.png)
+
+---
+
 
 ## 👨‍💻 Author
 
 **Group 1**
-Aspiring Cloud Engineers
+Adekunle James 
 
 ---
 
@@ -310,12 +519,9 @@ MIT License
 
 ## ⭐ Final Note
 
-FormFlow is built to reflect **real-world SaaS deployment practices**, combining:
+FormFlow demonstrates modern cloud-native application delivery by combining Docker, Docker Compose, Prisma ORM, GitHub Actions, Docker Hub, Terraform, and Azure deployment practices into a production-ready DevOps workflow.
 
-* Clean architecture
-* DevOps automation
-* Reliability through versioning
-* Production-grade deployment
+For a detailed explanation of the implementation, architecture, CI/CD pipeline, and deployment process, refer to the accompanying Design Report and Student Report included with this project.
 
 ---
 
