@@ -15,7 +15,7 @@ export default function HeroActions() {
       </Link>
 
       <Link
-        href="http://localhost:5000/api/v1/docs"
+        href="http://localhost/api/v1/docs"
         target="_blank"
         className="rounded-xl border border-zinc-700 px-6 py-4 font-semibold transition hover:border-blue-500"
       >
