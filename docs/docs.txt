@@ -443,6 +443,11 @@ docker compose \
   -f docker-compose.prod.yml \
   stop
 
+individual stop
+docker stop formflow-nginx
+docker stop formflow-frontend
+docker stop formflow-backend
+docker stop formflow-postgres
 
   git checkout main
 git merge dev
