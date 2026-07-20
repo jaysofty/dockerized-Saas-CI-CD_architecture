@@ -393,6 +393,12 @@ docker build \
 -f frontend/Dockerfile \
 ./frontend
 
+or 
+
+docker build \
+  -t kunzydev/formflow-frontend:1.0.3 \
+  -f frontend/Dockerfile \
+  ./frontend
 
 Nginx
 docker build \
@@ -401,6 +407,10 @@ docker build \
 ./deployment/nginx
 
 
+if IMAGW_TAG command doesnt respond load env to shell terminal
+set -a
+source .env.production
+set +a
 
 
 push to docker hub:
