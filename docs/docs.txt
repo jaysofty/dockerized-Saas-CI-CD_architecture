@@ -135,7 +135,7 @@ Done
 
 The CD Workflow
 
-Once you have a VM (Azure, AWS, Oracle Cloud, etc.), a second workflow will:
+Once a VM (Azure, AWS, Oracle Cloud, etc.), a second workflow will:
 
 SSH into VM
 
@@ -166,6 +166,9 @@ The only change needed later will be adding the VM's SSH credentials as GitHub S
 Phase 4
 Azure VM Deployment
 
+────────────────────────────
+
+
 ----------------------- completed Phase 1 ----------------
 Current Progress
 ✅ Express + TypeScript
@@ -173,13 +176,13 @@ Current Progress
 ✅ Prisma
 ✅ Dockerized backend
 ✅ Docker Compose orchestration
-✅ Swagger/OpenAPI
+✅ Swagger/OpenAPI grants users a UI for API test
 ✅ React Query
 ✅ Next.js frontend communicating with the backend
 ✅ Live dashboard statistics
 ✅ Health endpoint
 ✅ Professional landing page sections
-✅ Nginx Reverse Proxy
+✅ Nginx Reverse Proxy: port 80
 
 
 -----------------------------completed phase 2---------------------------
@@ -199,7 +202,7 @@ Current Progress
 
 
 
------------------------------------ Completed phase 3 --------------------------------
+----------------------------------- Next phase 3 --------------------------------
 
 CI/CD pipeline .
 
@@ -261,7 +264,7 @@ git push origin main --tags
 ---------------------------------------
 
 Create the development branch
-Always create it from the latest main.
+create it from the latest main.
 
 git checkout main
 git pull origin main
@@ -271,18 +274,18 @@ git push -u origin dev
 
 — Development workflow
 
-Whenever you're working:
+When working:
 
 git checkout dev
 
 Never develop directly on main.
-When a feature works:
 
+When a feature works:
 git add .
 git commit -m "feat(ci): add github actions pipeline"
 git push origin dev
 
-When you're satisfied:
+When satisfied:
 
 git checkout main
 git pull origin main
@@ -307,6 +310,9 @@ Error handling
 Swagger
 Health endpoint
 
+frontend development
+frontend package installations in requirements.txt
+
 
 Database
 PostgreSQL
@@ -317,7 +323,6 @@ npx prisma init
 npx prisma migrate dev
 npx prisma studio
 npx prisma generate
-
 
 
 Docker
@@ -345,15 +350,15 @@ docker build \
 nginx build:
 docker build -t formflow-nginx:dev .
 
-Tag your images manually
+Tag images manually
 docker tag formflow-backend:dev kunzydev/formflow-backend:1.0.0
 
 docker tag formflow-frontend:dev kunzydev/formflow-frontend:1.0.1
 
 docker tag formflow-nginx:dev kunzydev/formflow-nginx:1.0.0
 
-Useful Docker Compose Commands:
-cd to deployment directory
+Useful Docker Compose Commands for troubleshooting and deployments:
+cd to deployment directory or root dir
 
 start postgres:
 docker compose up -d postgres
@@ -364,8 +369,6 @@ docker compose run --rm backend npx prisma migrate deploy
 Local development
 docker compose up --build or docker compose up -d
 
-verify the validity of docker compose file:
-docker compose --env-file .env.production -f docker-compose.prod.yml config
 
 check prisma migration
 docker exec -it formflow-backend npx prisma migrate status
@@ -373,6 +376,9 @@ docker exec -it formflow-backend npx prisma migrate status
 
 Production image build and push:
 docker-compose.prod.yml:
+
+verify the validity of docker compose file:
+docker compose --env-file .env.production -f docker-compose.prod.yml config
 
 create a manual production release build with tags for docker hub:
 Backend
@@ -453,6 +459,9 @@ docker logs formflow-backend --tail=100
 check frontend container:
 docker exec formflow-frontend printenv | grep PORT
 
+check what version of image is running
+docker inspect formflow-backend --format='{{.Config.Image}}'
+
 Stop and remove volumes (this deletes your PostgreSQL data)
 docker compose down -v
 Rebuild after code changes
@@ -510,9 +519,7 @@ value: kunzydev or your docker hub username
 DOCKER_PASSWORD
 
 value:
-(your Docker Hub Access Token)
-
-Not your password.
+(Docker Hub Access Token)
 
 Generate one from Docker Hub
 
@@ -531,9 +538,10 @@ VM_USER
 VM_SSH_KEY
 
 
+create dir:
 .github/workflows/docker-build.yml
 
-this docker build will do this
+this docker build will
 do this:
 
 Push to main
@@ -563,26 +571,47 @@ docker build \
 push to docker hub:
 docker push kunzydev/formflow-backend:${IMAGE_TAG}
 
-Once Azure is available, we'll add another job:
 
+Once Azure is available, we'll add another job:
 deploy:
 
 that will
 
 SSH into the VM and run
 
-cd deployment
+---------------------------------completed phase 3 ---------------------------------
 
-docker compose \
---env-file .env.production \
--f docker-compose.prod.yml \
-pull
+✅ Git branching strategy (main + dev)
+✅ Local Docker development
+✅ Production compose file
+✅ Versioned Docker images
+✅ Automatic Prisma migrations
+✅ Docker Hub publishing
+✅ GitHub Actions building successfully
 
-docker compose \
---env-file .env.production \
--f docker-compose.prod.yml \
-up -d
+Push to dev
+      │
+      ▼
+GitHub Actions
+      │
+      ▼
+Build backend
+Build frontend
+Build nginx
+      │
+      ▼
+Push tagged images to Docker Hub
+----------
+The only missing piece:
 
+GitHub Actions
+      │
+      ▼
+SSH into Azure VM
+      │
+      ▼
+docker compose pull
+docker compose up -d
 
 ------------------------------------ Next Phase Terraform automation for  azure resources -------------------------
 
@@ -646,3 +675,76 @@ Rollback procedure.
 Secrets handling plan.
 CI/CD architecture.
 Azure deployment process.
+
+Required GitHub Secrets
+
+When your Azure VM is available, add these repository secrets:
+AZURE_VM_IP	20.xx.xx.xx
+AZURE_VM_USER	azureuser
+AZURE_VM_SSH_KEY	Entire private SSH key
+
+How the pipeline works
+Every push to the dev branch will:
+
+Build Backend
+Push Backend to Docker Hub
+Build Frontend
+Push Frontend
+Build Nginx
+Push Nginx
+SSH into Azure VM
+Pull the new tagged images
+Restart containers
+Remove unused images
+
+================= Errors encountered during GitActions Workflow build ===========
+
+Authentication issue: didn't include the right secret for password 
+Backend Package.lock.json issue: .gitignore excluded my package.lock.json file and git couldn't track it 
+
+checked with
+git check-ignore -v backend/package-lock.json
+
+resolved with: removing it from .gitignore
+
+Backend Package.lock.json issue: git wasn't tracking it
+
+resolved with: git add -f frontend/package-lock.json
+git status
+
+
+CI/CD
+the only major piece left is the SSH deployment job to the Azure VM
+
+encountered a VM provisioning limitation error
+
+Azure SKU/region capacity prevented full deployment
+-------------------------------------------------------------------
+
+Final Architecture
+Developer
+     │
+git push dev
+     │
+     ▼
+GitHub Actions
+     │
+     ├──────────────┐
+     │              │
+     ▼              ▼
+Build Images   Push Images
+     │              │
+     └──────┬───────┘
+            │
+            ▼
+SSH to Azure VM
+            │
+            ▼
+docker compose pull
+            │
+            ▼
+docker compose up -d
+            │
+            ▼
+Users access
+http://<vm-public-ip>
