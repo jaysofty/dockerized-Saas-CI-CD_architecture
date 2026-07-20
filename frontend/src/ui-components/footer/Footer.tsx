@@ -11,15 +11,13 @@ const product = [
 ];
 
 const resources = [
-  { label: "API Docs", href: "http://localhost:5000/api/v1/docs" },
-  { label: "Swagger", href: "http://localhost:5000/api/v1/docs" },
-  { label: "Docker", href: "#" },
+  { label: "API Docs", href: "http://localhost/api/v1/docs/#/" },
+
 ];
 
 const company = [
   { label: "About", href: "#" },
   { label: "Contact", href: "#contact" },
-  { label: "Privacy", href: "#" },
 ];
 
 export default function Footer() {

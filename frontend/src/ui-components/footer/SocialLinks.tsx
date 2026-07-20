@@ -11,17 +11,17 @@ export default function SocialLinks() {
   const links = [
     {
       icon: FaGithub,
-      href: "https://github.com/",
+      href: "https://github.com/jaysofty",
       label: "GitHub",
     },
     {
       icon: FaLinkedin,
-      href: "https://linkedin.com/",
+      href: "https://www.linkedin.com/in/adekunle-abowaba-09a2701b4/",
       label: "LinkedIn",
     },
     {
       icon: FaXTwitter,
-      href: "https://x.com/",
+      href: "https://x.com/jaysofty_",
       label: "X",
     },
   ];

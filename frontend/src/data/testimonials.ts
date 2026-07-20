@@ -1,8 +1,8 @@
 export const testimonials = [
   {
-    name: "Sarah Johnson",
-    role: "DevOps Lead",
-    company: "TechNova",
+    name: "Omotola",
+    role: "Project Lead",
+    company: "TechCrush",
     image: "/avatars/avatar-1.jpg",
     rating: 5,
     message:
@@ -10,9 +10,9 @@ export const testimonials = [
   },
 
   {
-    name: "Michael Chen",
+    name: "Abowaba Adekunle",
     role: "Software Engineer",
-    company: "CloudForge",
+    company: "TechCrush",
     image: "/avatars/avatar-2.jpg",
     rating: 5,
     message:
@@ -20,9 +20,9 @@ export const testimonials = [
   },
 
   {
-    name: "Aisha Bello",
+    name: "Fuja",
     role: "Product Manager",
-    company: "Vertex Labs",
+    company: "Tec Crush",
     image: "/avatars/avatar-3.jpg",
     rating: 5,
     message:
@@ -30,9 +30,9 @@ export const testimonials = [
   },
 
   {
-    name: "David Brown",
+    name: "Optimus Prime",
     role: "CTO",
-    company: "ScaleOps",
+    company: "TechCrush",
     image: "/avatars/avatar-4.jpg",
     rating: 5,
     message:

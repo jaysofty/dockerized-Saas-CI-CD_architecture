@@ -53,10 +53,6 @@ export default function Navbar() {
           <Button variant="ghost">
             Login
           </Button>
-
-          <Button>
-            Get Started
-          </Button>
         </div>
 
         <MobileMenu />
