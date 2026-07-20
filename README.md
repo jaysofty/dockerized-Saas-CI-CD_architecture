@@ -79,7 +79,7 @@ Ubuntu VM (Deployment Target)
 
 | Layer         | Technology           |
 | ------------- | -------------------- |
-| Frontend      | React (Vite) + Nginx |
+| Frontend      | Nextjs + Nginx       |
 | Backend       | Node.js + Express    |
 | ORM           | Prisma               |
 | Database      | PostgreSQL           |
