@@ -381,7 +381,7 @@ Response:
 
 ---
 
-## 📸 Screenshots (To Include)
+## 📸 Screenshots (Include)
 
 * GitHub repository
 * Docker Hub images & tags
@@ -502,6 +502,78 @@ Production images are published to Docker Hub.
 ![Docker PS](screenshots/docker-ps.png)
 
 ---
+
+## 📸 Rollback Demonstration
+
+The following screenshots demonstrate a successful rollback from **v1.0.3** to **v1.0.2** using Docker Compose and versioned Docker images stored in Docker Hub.
+
+---
+
+### 1️⃣ Current Production Version (v1.0.3)
+
+The backend service is verified to be running the latest deployed release (**v1.0.3**) before initiating the rollback.
+
+![Current Production Version](screenshots/rollback/01-current-version-1.0.3.png)
+
+---
+
+### 2️⃣ Update Production Image Tag
+
+The production environment is updated by changing the `IMAGE_TAG` value in `.env.production` from **1.0.3** to **1.0.2**.
+
+![Update Image Tag](screenshots/rollback/02-update-image-tag.png)
+
+---
+
+### 3️⃣ Pull Previous Stable Images
+
+Docker Compose pulls the previous stable images (**v1.0.2**) from Docker Hub.
+
+```bash
+docker compose \
+  --env-file .env.production \
+  -f docker-compose.prod.yml \
+  pull
+```
+
+![Docker Compose Pull](screenshots/rollback/03-pull-images.png)
+
+---
+
+
+### 5️⃣ Verify Successful Rollback
+
+The running backend container confirms that production has successfully reverted to **v1.0.2**.
+
+```bash
+docker inspect formflow-backend --format='{{.Config.Image}}'
+```
+
+Expected output:
+
+```text
+kunzydev/formflow-backend:1.0.2
+```
+
+---
+
+### 6️⃣ Healthy Production Environment
+
+All services are running successfully after the rollback, confirming a successful recovery with minimal downtime.
+
+![Healthy Containers](screenshots/rollback/06-docker-ps.png)
+
+---
+
+### ✅ Rollback Summary
+
+This demonstration validates FormFlow's production rollback strategy using immutable Docker images and semantic versioning.
+
+- ✔ Previous releases are stored in Docker Hub.
+- ✔ Rollback requires only updating the deployment image tag.
+- ✔ No application rebuild is required.
+- ✔ Database data remains intact.
+- ✔ Production recovery completes within minutes.
 
 
 ## 👨‍💻 Author
