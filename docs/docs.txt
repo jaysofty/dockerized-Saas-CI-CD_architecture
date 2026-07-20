@@ -159,6 +159,8 @@ Health Check
 
 Deployment Complete
 The only change needed later will be adding the VM's SSH credentials as GitHub Secrets.
+
+
 ────────────────────────────
 
 Phase 4
@@ -182,13 +184,72 @@ Current Progress
 
 -----------------------------completed phase 2---------------------------
 
-✅ Versioned Docker images
-✅ Docker Hub
-✅ Production Compose
-✅ Production deployment
-✅ Database migration
+✅ Backend containerized
+✅ Frontend containerized
+✅ Nginx containerized
+✅ PostgreSQL containerized
+✅ Multi-stage Dockerfiles
+✅ Docker Compose (development)
+✅ Docker Compose (production)
+✅ Images tagged
+✅ Images pushed to Docker Hub
+✅ Automatic Prisma migrations
+✅ Git branching strategy (main/dev)
+✅ Production deployment tested locally using Docker Hub images
+
+
+
+----------------------------------- Completed phase 3 --------------------------------
+
+CI/CD pipeline .
+
+Developer
+     │
+     ▼
+Push to dev
+     │
+     ▼
+GitHub Actions
+     │
+     ├──────────────
+     │ Checkout
+     │
+     ├──────────────
+     │ Build backend image
+     │
+     ├──────────────
+     │ Build frontend image
+     │
+     ├──────────────
+     │ Build nginx image
+     │
+     ├──────────────
+     │ Login DockerHub
+     │
+     ├──────────────
+     │ Push images
+     │
+     └──────────────
+          │
+          ▼
+
+          Later...
+
+Push to main
+        │
+        ▼
+GitHub Actions
+        │
+        ▼
+SSH Azure VM
+        │
+        ▼
+docker compose pull
+docker compose up -d
 
 ---------------------------------------------
+create a repo and push to a branch
+
 Git log showing the commits:
 git log --oneline
 
@@ -284,6 +345,7 @@ docker build \
 nginx build:
 docker build -t formflow-nginx:dev .
 
+Tag your images manually
 docker tag formflow-backend:dev kunzydev/formflow-backend:1.0.0
 
 docker tag formflow-frontend:dev kunzydev/formflow-frontend:1.0.1
@@ -309,39 +371,39 @@ check prisma migration
 docker exec -it formflow-backend npx prisma migrate status
 
 
+Production image build and push:
+docker-compose.prod.yml:
 
-docker-compose.prod.yml
-create production release build for docker hub
-
+create a manual production release build with tags for docker hub:
 Backend
 docker build \
--t kunzydev/formflow-backend:1.0.2 \
--f ../backend/Dockerfile \
-../backend
+-t kunzydev/formflow-backend:${IMAGE_TAG} \
+-f backend/Dockerfile \
+./backend
 
 Frontend
 docker build \
-  -t kunzydev/formflow-frontend:1.0.2 \
-  -f frontend/Dockerfile \
-  ./frontend
+-t kunzydev/formflow-frontend:${IMAGE_TAG} \
+-f frontend/Dockerfile \
+./frontend
 
 
 Nginx
 docker build \
-  -t kunzydev/formflow-nginx:1.0.2 \
-  -f deployment/nginx/Dockerfile \
-  ./deployment/nginx
+-t kunzydev/formflow-nginx:${IMAGE_TAG} \
+-f deployment/nginx/Dockerfile \
+./deployment/nginx
 
 
 
 
 push to docker hub:
 
-docker push kunzydev/formflow-backend:1.0.2
+docker push kunzydev/formflow-backend:${IMAGE_TAG}
 
-docker push kunzydev/formflow-frontend:1.0.2
+docker push kunzydev/formflow-frontend:${IMAGE_TAG}
 
-docker push kunzydev/formflow-nginx:1.0.2
+docker push kunzydev/formflow-nginx:${IMAGE_TAG}
 
 
 test production compose.yml:
@@ -364,7 +426,7 @@ up -d
 The workflow:
 docker compose -f docker-compose.prod.yml --env-file .env.production build
 
-followed by:
+followed by pushing to docker hub:
 docker compose -f docker-compose.prod.yml --env-file .env.production push
 
 Uses:
@@ -413,13 +475,114 @@ docker exec -it formflow-backend npx prisma migrate status
 check prisma schema inside container:
 docker exec formflow-backend cat prisma/schema.prisma
 
-deploy migration:
+deploy prisma migration if needed:
 docker exec -it formflow-backend npx prisma migrate deploy
 
 verify tables:
 docker exec -it formflow-postgres psql -U postgres -d formflow
 
 \dt
+
+
+--------------------- Next phase: Github actions CI/CD workflow -------------------------
+GitHub Secrets:
+
+Go to
+
+GitHub
+
+Repository
+
+Settings
+
+Secrets and Variables
+
+Actions
+
+Create these:
+
+DockerHub
+DOCKER_USERNAME
+
+value: kunzydev or your docker hub username
+
+
+DOCKER_PASSWORD
+
+value:
+(your Docker Hub Access Token)
+
+Not your password.
+
+Generate one from Docker Hub
+
+Account
+
+Security
+
+Access Tokens
+
+when VM is up and running ill add
+
+VM_HOST
+
+VM_USER
+
+VM_SSH_KEY
+
+
+.github/workflows/docker-build.yml
+
+this docker build will do this
+do this:
+
+Push to main
+
+↓
+
+Build backend
+
+↓
+
+Build frontend
+
+↓
+
+Build nginx
+
+↓
+
+Push to Docker Hub
+
+the workflow will essentially execute the same commands as the production compose.yml:
+docker build \
+-t kunzydev/formflow-backend:${IMAGE_TAG} \
+-f backend/Dockerfile \
+./backend
+
+push to docker hub:
+docker push kunzydev/formflow-backend:${IMAGE_TAG}
+
+Once Azure is available, we'll add another job:
+
+deploy:
+
+that will
+
+SSH into the VM and run
+
+cd deployment
+
+docker compose \
+--env-file .env.production \
+-f docker-compose.prod.yml \
+pull
+
+docker compose \
+--env-file .env.production \
+-f docker-compose.prod.yml \
+up -d
+
 
 ------------------------------------ Next Phase Terraform automation for  azure resources -------------------------
 
@@ -450,9 +613,10 @@ The Full Module Plan
 ✔ Network Interface
 ✔ Bastion Public IP
 ✔ Azure Bastion Host
+🔜 VM
 
 
-Test the Module
+Test the terraform Modules
 From the terraform directory:
 cd terraform/environments/dev
 RUN:
@@ -468,3 +632,17 @@ terraform apply
 
 terraform state list
 
+
+
+
+-------------------------------------------------Remaining tasks:
+
+✅ Create GitHub Actions workflow to build and push Docker images.
+⏳ Add automated deployment over SSH to the Azure VM.
+⏳ Resolve Azure VM SKU/capacity issue (or document it if required by the project).
+⏳ Write the documentation sections covering:
+Image tagging strategy.
+Rollback procedure.
+Secrets handling plan.
+CI/CD architecture.
+Azure deployment process.
