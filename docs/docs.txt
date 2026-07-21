@@ -615,7 +615,6 @@ docker build \
 push to docker hub:
 docker push kunzydev/formflow-backend:${IMAGE_TAG}
 
-
 Once Azure is available, we'll add another job:
 deploy:
 
