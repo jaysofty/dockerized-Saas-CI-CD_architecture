@@ -12,67 +12,33 @@ import { successResponse } from "./utils/apiResponse";
 const app = express();
 
 app.use(cors());
-// app.use(helmet()); used later for https
+
 app.use(
   helmet({
     crossOriginOpenerPolicy: false,
     originAgentCluster: false,
     strictTransportSecurity: false,
-
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-
-        styleSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          "https:",
-        ],
-
-        scriptSrc: [
-          "'self'",
-          "'unsafe-inline'",
-        ],
-
-        imgSrc: [
-          "'self'",
-          "data:",
-          "https:",
-        ],
-
-        fontSrc: [
-          "'self'",
-          "https:",
-          "data:",
-        ],
-
-        connectSrc: [
-          "'self'",
-        ],
-      },
-    },
+    contentSecurityPolicy: false,
   })
 );
+
 app.use(morgan("dev"));
 app.use(express.json());
 
 // Health
 app.get("/api/v1/health", (_, res) => {
   res.status(200).json(
-    successResponse(
-      "API is healthy.",
-      {
-        status: "Healthy",
-        application: "FormFlow",
-        version: "1.0.0",
-        uptime: process.uptime(),
-        timestamp: new Date().toISOString(),
-      }
-    )
+    successResponse("API is healthy.", {
+      status: "Healthy",
+      application: "FormFlow",
+      version: "1.0.0",
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+    })
   );
 });
 
-// <-- ADD THIS
+// OpenAPI JSON
 app.get("/api/v1/openapi.json", (_, res) => {
   res.json(swaggerDocument);
 });
@@ -84,7 +50,7 @@ app.use(
   swaggerUi.setup(swaggerDocument)
 );
 
-// Routes
+// API routes
 app.use("/api/v1/forms", formRoutes);
 
 // MUST BE LAST
