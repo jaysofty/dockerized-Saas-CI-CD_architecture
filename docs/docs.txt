@@ -780,14 +780,15 @@ sudo cat /opt/formflow/deployment/.env.production.backend
 do the same for databse .env.production on the vm
 sudo nano /opt/formflow/deployment/.env.production.database
 
-secure the database credentials
+secure all credentials
 Only azureuser can read/write it other users cant with this approach
+sudo chown azureuser:azureuser /opt/formflow/deployment/.env.production.backend
 sudo chown azureuser:azureuser /opt/formflow/deployment/.env.production.database
+sudo chown azureuser:azureuser /opt/formflow/deployment/.env.production.frontend
+
+chmod 600 /opt/formflow/deployment/.env.production.backend
 chmod 600 /opt/formflow/deployment/.env.production.database
-
-do the same for frontend env:
-
-sudo nano /opt/formflow/deployment/.env.production.frontend
+chmod 600 /opt/formflow/deployment/.env.production.frontend
 -------------------------------------------------Remaining tasks:
 
 ✅ Create GitHub Actions workflow to build and push Docker images.
