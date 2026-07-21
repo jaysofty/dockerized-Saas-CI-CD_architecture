@@ -14,13 +14,13 @@ export default function HeroActions() {
         <ArrowRight className="ml-2 h-5 w-5" />
       </Link>
 
-      <Link
-        href="http://localhost/api/v1/docs"
-        target="_blank"
-        className="rounded-xl border border-zinc-700 px-6 py-4 font-semibold transition hover:border-blue-500"
-      >
-        API Documentation
-      </Link>
+     <Link
+  href={`${process.env.NEXT_PUBLIC_API_URL}/docs`}
+  target="_blank"
+  className="rounded-xl border border-zinc-700 px-6 py-4 font-semibold transition hover:border-blue-500"
+>
+  API Documentation
+</Link>
     </div>
   );
 }
