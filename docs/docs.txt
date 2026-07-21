@@ -749,6 +749,7 @@ cat terraform/environments/dev/terraform.tfvars
 ssh to vm and create deployment directory
 sudo mkdir -p /opt/formflow/deployment
 sudo chown -R azureuser:azureuser /opt/formflow
+
 -------------------------------------------------Remaining tasks:
 
 ✅ Create GitHub Actions workflow to build and push Docker images.
