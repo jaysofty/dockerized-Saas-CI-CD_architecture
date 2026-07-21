@@ -12,7 +12,47 @@ import { successResponse } from "./utils/apiResponse";
 const app = express();
 
 app.use(cors());
-app.use(helmet());
+// app.use(helmet()); used later for https
+app.use(
+  helmet({
+    crossOriginOpenerPolicy: false,
+    originAgentCluster: false,
+    strictTransportSecurity: false,
+
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+
+        styleSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https:",
+        ],
+
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+        ],
+
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https:",
+        ],
+
+        fontSrc: [
+          "'self'",
+          "https:",
+          "data:",
+        ],
+
+        connectSrc: [
+          "'self'",
+        ],
+      },
+    },
+  })
+);
 app.use(morgan("dev"));
 app.use(express.json());
 
