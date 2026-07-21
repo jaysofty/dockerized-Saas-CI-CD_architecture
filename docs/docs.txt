@@ -776,6 +776,13 @@ sudo ls -la /opt/formflow/deployment
 
 check contents:
 sudo cat /opt/formflow/deployment/.env.production.backend
+
+do the same for databse .env.production on the vm
+sudo nano /opt/formflow/deployment/.env.production.database
+
+secure the database credentials
+sudo chown azureuser:azureuser /opt/formflow/deployment/.env.production.database
+chmod 600 /opt/formflow/deployment/.env.production.database
 -------------------------------------------------Remaining tasks:
 
 ✅ Create GitHub Actions workflow to build and push Docker images.
