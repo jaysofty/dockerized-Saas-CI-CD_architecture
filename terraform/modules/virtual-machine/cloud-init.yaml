@@ -1,5 +1,4 @@
-#cloud-config
-
+  #cloud-config
 package_update: true
 package_upgrade: true
 
@@ -13,30 +12,24 @@ packages:
 
 runcmd:
 
-  # Install Docker
+  # Enable Docker
   - curl -fsSL https://get.docker.com | sh
-
+  
+  # Enable Docker
   - systemctl enable docker
-
   - systemctl start docker
 
-  # Install Docker Compose
+  # Install Docker Compose Plugin
   - curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
-
   - chmod +x /usr/local/bin/docker-compose
 
-  # Allow azureuser to run docker
+  # Allow Azure user to run Docker
   - usermod -aG docker azureuser
 
-  # Application directory
-  - mkdir -p /opt/formflow
+
+  # Deployment directory
+  - mkdir -p /opt/formflow/deployment
 
   - chown -R azureuser:azureuser /opt/formflow
 
-  # Clone repository
-  - sudo -u azureuser git clone https://github.com/jaysofty/dockerized-Saas-CI-CD_architecture /opt/formflow
-
-  # Start application
-  - cd /opt/formflow/deployment
-
-  - docker compose up -d
+  - echo "FormFlow VM bootstrap completed."

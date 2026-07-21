@@ -1,100 +1,83 @@
 module "resource_group" {
+
   source = "../../modules/resource-group"
 
   resource_group_name = var.resource_group_name
-  location            = var.location
+
+  location = var.location
+
+  tags = {
+
+    Environment = "Development"
+
+    Project = "FormFlow"
+
+    ManagedBy = "Terraform"
+  }
 }
 
 module "network" {
+
   source = "../../modules/network"
 
   resource_group_name = module.resource_group.name
-  location            = module.resource_group.location
 
-  vnet_name     = var.vnet_name
-  address_space = var.address_space
-}
+  location = var.location
 
-module "subnet" {
-  source = "../../modules/subnet"
+  vnet_name = var.vnet_name
 
-  subnet_name          = var.subnet_name
-  resource_group_name  = module.resource_group.name
-  virtual_network_name = module.network.name
+  subnet_name = var.subnet_name
 
-  address_prefixes = var.subnet_prefixes
-}
+  nic_name = var.nic_name
 
+  public_ip_name = var.public_ip_name
 
-module "nsg" {
-  source = "../../modules/nsg"
+  nsg_name = var.nsg_name
 
-  nsg_name            = var.nsg_name
-  location            = module.resource_group.location
-  resource_group_name = module.resource_group.name
-}
+  create_public_ip = true
 
-module "nsg_association" {
+  enable_ssh = var.enable_ssh
 
-  source = "../../modules/nsg-association"
+  tags = {
 
-  subnet_id = module.subnet.id
+    Environment = "Development"
 
-  nsg_id = module.nsg.id
+    Project = "FormFlow"
+
+    ManagedBy = "Terraform"
+
+  }
 
 }
 
-module "public_ip" {
-  source = "../../modules/public-ip"
+module "virtual_machine" {
 
-  pip_name            = var.pip_name
-  location            = module.resource_group.location
-  resource_group_name = module.resource_group.name
-}
+  source = "../../modules/virtual-machine"
 
-module "nic" {
-  source = "../../modules/nic"
+  vm_name = var.vm_name
 
-  nic_name            = var.nic_name
-  location            = module.resource_group.location
+  location = var.location
+
   resource_group_name = module.resource_group.name
 
-  subnet_id    = module.subnet.id
-  public_ip_id = module.public_ip.id
-}
-
-module "bastion_subnet" {
-  source = "../../modules/subnet"
-
-  subnet_name          = var.bastion_subnet_name
-  resource_group_name  = module.resource_group.name
-  virtual_network_name = module.network.name
-
-  address_prefixes = var.bastion_subnet_prefixes
-}
-
-module "bastion" {
-  source = "../../modules/bastion"
-
-  bastion_name        = var.bastion_name
-  location            = module.resource_group.location
-  resource_group_name = module.resource_group.name
-
-  subnet_id = module.bastion_subnet.id
-}
-
-module "vm" {
-  source = "../../modules/vm"
-
-  vm_name             = var.vm_name
-  location            = module.resource_group.location
-  resource_group_name = module.resource_group.name
-
-  network_interface_id = module.nic.id
-
-  vm_size = var.vm_size
+  nic_id = module.network.nic_id
 
   admin_username = var.admin_username
 
-  ssh_public_key = var.ssh_public_key
+  ssh_public_key_path = var.ssh_public_key_path
+
+  vm_size = var.vm_size
+
+  os_disk_size_gb = var.os_disk_size_gb
+
+  tags = {
+
+    Environment = "Development"
+
+    Project = "FormFlow"
+
+    ManagedBy = "Terraform"
+
+  }
+
 }

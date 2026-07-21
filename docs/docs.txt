@@ -291,6 +291,20 @@ git checkout main
 git pull origin main
 git merge dev
 git push origin main
+
+
+if you mistakenly worked on main branch you can stash the changes 
+checkout of main to dev and pop the changes to dev
+example:
+
+git stash push -u -m "Terraform refactor"
+git status
+git checkout dev
+git stash pop
+git add .
+git commit -m "Refactor Terraform project structure"
+git push origin dev
+
 --------------------------------------------
 
 
@@ -449,7 +463,7 @@ docker stop formflow-frontend
 docker stop formflow-backend
 docker stop formflow-postgres
 
-  git checkout main
+git checkout main
 git merge dev
 
 git tag v1.0.3
@@ -692,8 +706,49 @@ terraform apply
 terraform state list
 
 
+after resources applied 
 
+get vm publicIp:
+az vm list -d -o table
 
+SSH into the VM:
+ssh azureuser@4.168.233.3
+
+If everything is configured correctly, you'll get a shell like:
+azureuser@formflow-dev-vm:~$
+
+Verify cloud-init:
+docker --version
+
+check git version:
+git --version
+
+check whether your repository was cloned:
+ls /opt
+
+cd /opt/formflow
+ls
+
+check running container 
+docker ps -a
+
+docker compose up -d
+
+check logs
+sudo tail -100 /var/log/cloud-init-output.log
+
+get ssh key
+ls ~/.ssh
+
+view ssh key:
+cat ~/.ssh/id_ed25519
+
+show what key terraform vm is using
+cat terraform/environments/dev/terraform.tfvars
+
+ssh to vm and create deployment directory
+sudo mkdir -p /opt/formflow/deployment
+sudo chown -R azureuser:azureuser /opt/formflow
 -------------------------------------------------Remaining tasks:
 
 ✅ Create GitHub Actions workflow to build and push Docker images.

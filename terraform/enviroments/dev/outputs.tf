@@ -1,39 +1,34 @@
 output "resource_group_name" {
+
   value = module.resource_group.name
 }
 
-output "vnet_name" {
-  value = module.network.name
+output "resource_group_id" {
+
+  value = module.resource_group.id
 }
 
-output "subnet_id" {
-  value = module.subnet.id
-}
+output "location" {
 
-output "nsg_name" {
-  value = module.nsg.name
+  value = module.resource_group.location
 }
 
 output "public_ip" {
-  value = module.public_ip.ip_address
+
+  value = module.network.public_ip
 }
 
-output "nic_name" {
-  value = module.nic.name
+output "nic_id" {
+
+  value = module.network.nic_id
 }
 
-output "private_ip" {
-  value = module.nic.private_ip_address
+output "subnet_id" {
+
+  value = module.network.subnet_id
 }
 
 output "vm_name" {
-  value = module.vm.name
-}
 
-output "vm_id" {
-  value = module.vm.id
-}
-
-output "bastion_id" {
-  value = module.bastion.id
+  value = module.virtual_machine.vm_name
 }
