@@ -757,6 +757,25 @@ ssh to vm and create deployment directory
 sudo mkdir -p /opt/formflow/deployment
 sudo chown -R azureuser:azureuser /opt/formflow
 
+add enviromane variables to vm
+first
+ssh -i ~/.ssh/id_rsa azureuser@102.133.165.13
+
+then
+cd /opt/formflow/deployment
+
+sudo nano /opt/formflow/deployment/.env.production.backend
+
+Save with:
+Ctrl + O
+Enter
+Ctrl + X
+
+verify it exists:
+sudo ls -la /opt/formflow/deployment
+
+check contents:
+sudo cat /opt/formflow/deployment/.env.production.backend
 -------------------------------------------------Remaining tasks:
 
 ✅ Create GitHub Actions workflow to build and push Docker images.
