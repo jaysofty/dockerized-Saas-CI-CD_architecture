@@ -102,7 +102,7 @@ jobs:
           host: ${{ secrets.AZURE_VM_IP }}
           username: ${{ secrets.AZURE_VM_USER }}
           key: ${{ secrets.AZURE_VM_SSH_KEY }}
-          source: "deployment"
+          source: "deployment/*"
           target: "/opt/formflow"
           overwrite: true
           strip_components: 1
