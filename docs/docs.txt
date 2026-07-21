@@ -748,7 +748,7 @@ get ssh key
 ls ~/.ssh
 
 view ssh key:
-cat ~/.ssh/id_ed25519
+cat ~/.ssh/id_rsa
 
 show what key terraform vm is using
 cat terraform/environments/dev/terraform.tfvars
