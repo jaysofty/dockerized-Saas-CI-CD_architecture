@@ -13,9 +13,9 @@ env:
 
 jobs:
 
-  ####################################################
-  # BUILD + PUSH
-  ####################################################
+  ######################################################
+  # BUILD AND PUSH DOCKER IMAGES
+  ######################################################
 
   docker:
 
@@ -35,9 +35,9 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      ####################################################
-      # Backend
-      ####################################################
+      ######################################################
+      # BACKEND
+      ######################################################
 
       - name: Build Backend
         run: |
@@ -47,11 +47,12 @@ jobs:
             ./backend
 
       - name: Push Backend
-        run: docker push kunzydev/formflow-backend:${IMAGE_TAG}
+        run: |
+          docker push kunzydev/formflow-backend:${IMAGE_TAG}
 
-      ####################################################
-      # Frontend
-      ####################################################
+      ######################################################
+      # FRONTEND
+      ######################################################
 
       - name: Build Frontend
         run: |
@@ -61,11 +62,12 @@ jobs:
             ./frontend
 
       - name: Push Frontend
-        run: docker push kunzydev/formflow-frontend:${IMAGE_TAG}
+        run: |
+          docker push kunzydev/formflow-frontend:${IMAGE_TAG}
 
-      ####################################################
-      # Nginx
-      ####################################################
+      ######################################################
+      # NGINX
+      ######################################################
 
       - name: Build Nginx
         run: |
@@ -75,11 +77,13 @@ jobs:
             ./deployment/nginx
 
       - name: Push Nginx
-        run: docker push kunzydev/formflow-nginx:${IMAGE_TAG}
+        run: |
+          docker push kunzydev/formflow-nginx:${IMAGE_TAG}
 
-  ####################################################
+
+  ######################################################
   # DEPLOY TO AZURE VM
-  ####################################################
+  ######################################################
 
   deploy:
 
@@ -92,9 +96,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      ####################################################
-      # Copy Deployment Folder
-      ####################################################
+      ######################################################
+      # COPY DOCKER COMPOSE FILES
+      ######################################################
 
       - name: Copy Deployment Files
         uses: appleboy/scp-action@v0.1.7
@@ -102,32 +106,74 @@ jobs:
           host: ${{ secrets.AZURE_VM_IP }}
           username: ${{ secrets.AZURE_VM_USER }}
           key: ${{ secrets.AZURE_VM_SSH_KEY }}
-          source: "deployment/*"
+
+          source: "deployment"
           target: "/opt/formflow"
+
           overwrite: true
-          strip_components: 1
 
-      ####################################################
-      # Deploy Latest Images
-      ####################################################
+      ######################################################
+      # CREATE ENVIRONMENT FILE ON VM
+      ######################################################
 
-      - name: Deploy Containers
+      - name: Configure VM Environment
         uses: appleboy/ssh-action@v1.2.0
+        env:
+          IMAGE_TAG: ${{ env.IMAGE_TAG }}
+          PRODUCTION_ENV: ${{ secrets.PRODUCTION_ENV }}
+
         with:
           host: ${{ secrets.AZURE_VM_IP }}
           username: ${{ secrets.AZURE_VM_USER }}
           key: ${{ secrets.AZURE_VM_SSH_KEY }}
+
+          envs: IMAGE_TAG,PRODUCTION_ENV
+
           script: |
 
             set -e
 
             echo "========================================="
-            echo "Starting FormFlow Deployment..."
+            echo "Configuring FormFlow Environment"
             echo "========================================="
 
-            mkdir -p /opt/formflow
+            mkdir -p /opt/formflow/deployment
+
+            echo "$PRODUCTION_ENV" > /opt/formflow/deployment/.env.production
+
+            echo "IMAGE_TAG=$IMAGE_TAG" >> /opt/formflow/deployment/.env.production
+
+            chmod 600 /opt/formflow/deployment/.env.production
+
+            echo "Environment configured successfully."
+
+            echo "Deploying image tag:"
+            echo "$IMAGE_TAG"
+
+
+      ######################################################
+      # DEPLOY CONTAINERS
+      ######################################################
+
+      - name: Deploy Latest Containers
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.AZURE_VM_IP }}
+          username: ${{ secrets.AZURE_VM_USER }}
+          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+
+          script: |
+
+            set -e
+
+            echo "========================================="
+            echo "Starting FormFlow Deployment"
+            echo "========================================="
 
             cd /opt/formflow/deployment
+
+            echo "Current deployment configuration:"
+            grep IMAGE_TAG .env.production
 
             echo "Stopping old containers..."
 
@@ -136,31 +182,34 @@ jobs:
               -f docker-compose.prod.yml \
               down --remove-orphans
 
-            echo "Pulling latest images..."
+            echo "Pulling Docker images..."
 
             docker compose \
               --env-file .env.production \
               -f docker-compose.prod.yml \
               pull
 
-            echo "Starting new containers..."
+            echo "Starting containers..."
 
             docker compose \
               --env-file .env.production \
               -f docker-compose.prod.yml \
               up -d
 
-            echo "Cleaning dangling images..."
+            echo "Cleaning unused images..."
 
-            docker image prune -f
+            docker image prune -af
 
-            echo ""
+            echo "========================================="
             echo "Running Containers"
+            echo "========================================="
+
             docker ps
 
-      ####################################################
-      # HEALTH CHECK
-      ####################################################
+
+      ######################################################
+      # VERIFY DEPLOYMENT
+      ######################################################
 
       - name: Verify Deployment
         uses: appleboy/ssh-action@v1.2.0
@@ -168,17 +217,19 @@ jobs:
           host: ${{ secrets.AZURE_VM_IP }}
           username: ${{ secrets.AZURE_VM_USER }}
           key: ${{ secrets.AZURE_VM_SSH_KEY }}
+
           script: |
 
+            set -e
+
             echo "Waiting for application..."
+
             sleep 20
 
-            echo "Checking running containers..."
-            docker ps
+            echo "Testing Nginx..."
 
-            echo "Checking Nginx..."
+            curl -f http://localhost
 
-            curl -I http://localhost
-
-            echo ""
+            echo "========================================="
             echo "Deployment Successful!"
+            echo "========================================="

@@ -707,11 +707,19 @@ terraform state list
 
 after resources applied 
 
+verify vm is running:
+ az vm get-instance-view \
+  --resource-group formflow-dev-rg \
+  --name formflow-dev-vm \
+  --query instanceView.statuses[1].displayStatus \
+  -o tsv
+VM running
+
 get vm publicIp:
 az vm list -d -o table
 
 SSH into the VM:
-ssh azureuser@4.168.233.3
+ssh azureuser@102.133.165.13
 
 If everything is configured correctly, you'll get a shell like:
 azureuser@formflow-dev-vm:~$
