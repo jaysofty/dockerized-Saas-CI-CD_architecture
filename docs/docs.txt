@@ -618,8 +618,8 @@ docker push kunzydev/formflow-backend:${IMAGE_TAG}
 Once Azure is available, we'll add another job:
 deploy:
 
-that will
 
+that will
 SSH into the VM and run
 
 ---------------------------------completed phase 3 ---------------------------------
